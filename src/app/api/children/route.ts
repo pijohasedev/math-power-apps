@@ -8,7 +8,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { name, pin, avatarColor } = await request.json();
+    const { name, pin, form, avatarColor } = await request.json();
     if (!name || !pin || pin.length < 4) {
       return NextResponse.json({ error: "Nama dan PIN (min 4 aksara) diperlukan" }, { status: 400 });
     }
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "PIN ini sudah digunakan oleh anak lain" }, { status: 400 });
     }
     const child = await prisma.child.create({
-      data: { name, pin, avatarColor: avatarColor || "blue" },
+      data: { name, pin, form: form ? parseInt(form) : 1, avatarColor: avatarColor || "blue" },
     });
     return NextResponse.json(child, { status: 201 });
   } catch {

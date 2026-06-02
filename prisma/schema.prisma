@@ -24,6 +24,7 @@ model Child {
   id                Int          @id @default(autoincrement())
   name              String
   pin               String
+  form              Int          @default(1)
   avatarColor       String       @default("blue")
   currentPoints     Int          @default(0)
   totalPointsEarned Int          @default(0)

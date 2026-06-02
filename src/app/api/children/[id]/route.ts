@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const { name, pin, avatarColor } = await request.json();
+    const { name, pin, form, avatarColor } = await request.json();
     const childId = parseInt(id);
 
     if (pin) {
@@ -18,7 +18,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const child = await prisma.child.update({
       where: { id: childId },
-      data: { name, pin, avatarColor },
+      data: { name, pin, form: form ? parseInt(form) : undefined, avatarColor },
     });
     return NextResponse.json(child);
   } catch {
