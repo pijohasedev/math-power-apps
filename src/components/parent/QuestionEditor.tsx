@@ -253,16 +253,19 @@ export function QuestionEditor({ initialData, isEdit = false }: QuestionEditorPr
               {["A", "B", "C", "D"].map((opt) => {
                 const key = `option${opt}` as keyof QuestionFormData;
                 return (
-                  <div key={opt} className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-sm">
-                      {opt}
-                    </span>
-                    <Input
-                      value={form[key] as string}
-                      onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                      placeholder={`Pilihan ${opt}`}
-                      className="flex-1"
-                    />
+                  <div key={opt} className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-sm shrink-0">
+                        {opt}
+                      </span>
+                      <Input
+                        value={form[key] as string}
+                        onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                        placeholder={`Taip pilihan ${opt} (guna $latex$ jika perlu)`}
+                        className="flex-1"
+                      />
+                    </div>
+                    <MathPreview value={form[key] as string} label={`Pratonton pilihan ${opt}`} />
                   </div>
                 );
               })}
