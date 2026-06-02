@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Parent {
+  id   Int    @id @default(autoincrement())
+  name String
+  pin  String
+}
+
+model PointConfig {
+  id          Int  @id @default(autoincrement())
+  easyPoints  Int  @default(1)
+  mediumPoints Int @default(2)
+  hardPoints  Int  @default(3)
+}
+
+model Child {
+  id                Int          @id @default(autoincrement())
+  name              String
+  pin               String
+  avatarColor       String       @default("blue")
+  currentPoints     Int          @default(0)
+  totalPointsEarned Int          @default(0)
+  totalQuestions    Int          @default(0)
+  correctAnswers    Int          @default(0)
+  attempts          Attempt[]
+  redemptions       Redemption[]
+}
+
+model Topic {
+  id        Int        @id @default(autoincrement())
+  name      String
+  form      Int
+  icon      String     @default("📐")
+  questions Question[]
+}
+
+model Question {
+  id            Int       @id @default(autoincrement())
+  topicId       Int
+  topic         Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  type          String
+  difficulty    String
+  questionText  String
+  options       String?
+  correctAnswer String
+  explanation   String?
+  points        Int       @default(1)
+  attempts      Attempt[]
+}
+
+model Attempt {
+  id           Int      @id @default(autoincrement())
+  childId      Int
+  child        Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  questionId   Int
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerGiven  String
+  isCorrect    Boolean
+  pointsEarned Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+model Reward {
+  id             Int          @id @default(autoincrement())
+  name           String
+  description    String
+  pointsRequired Int
+  icon           String       @default("🎮")
+  isActive       Boolean      @default(true)
+  redemptions    Redemption[]
+}
+
+model Redemption {
+  id        Int      @id @default(autoincrement())
+  childId   Int
+  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  rewardId  Int
+  reward    Reward   @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  points    Int
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
