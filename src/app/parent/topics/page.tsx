@@ -18,13 +18,31 @@ interface Topic {
 }
 
 const ICONS = ["📐", "📊", "🔢", "📏", "➕", "➗", "📈", "🧮", "🎯", "⚡"];
-const FORMS = [1, 2, 3];
+
+const LEVELS = [
+  { value: "1", label: "Tahun 1" },
+  { value: "2", label: "Tahun 2" },
+  { value: "3", label: "Tahun 3" },
+  { value: "4", label: "Tahun 4" },
+  { value: "5", label: "Tahun 5" },
+  { value: "6", label: "Tahun 6" },
+  { value: "7", label: "Tingkatan 1" },
+  { value: "8", label: "Tingkatan 2" },
+  { value: "9", label: "Tingkatan 3" },
+  { value: "10", label: "Tingkatan 4" },
+  { value: "11", label: "Tingkatan 5" },
+];
+
+function levelLabel(form: number) {
+  const level = LEVELS.find(l => l.value === String(form));
+  return level ? level.label : `Tingkatan ${form}`;
+}
 
 export default function TopicsPage() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Topic | null>(null);
-  const [form, setForm] = useState({ name: "", form: "1", icon: "📐" });
+  const [form, setForm] = useState({ name: "", form: "7", icon: "📐" });
   const [error, setError] = useState("");
 
   useEffect(() => { fetchTopics(); }, []);
@@ -37,7 +55,7 @@ export default function TopicsPage() {
 
   function openCreate() {
     setEditing(null);
-    setForm({ name: "", form: "1", icon: "📐" });
+    setForm({ name: "", form: "7", icon: "📐" });
     setError("");
     setDialogOpen(true);
   }
@@ -69,9 +87,10 @@ export default function TopicsPage() {
     fetchTopics();
   }
 
-  const grouped = FORMS.map(f => ({
-    form: f,
-    topics: topics.filter(t => t.form === f),
+  const grouped = LEVELS.map(l => ({
+    form: parseInt(l.value),
+    label: l.label,
+    topics: topics.filter(t => t.form === parseInt(l.value)),
   }));
 
   return (
@@ -101,9 +120,9 @@ export default function TopicsPage() {
         <div className="space-y-6">
           {grouped.map(group => (
             <div key={group.form}>
-              <h2 className="text-lg font-semibold mb-3">Tingkatan {group.form}</h2>
+              <h2 className="text-lg font-semibold mb-3">{group.label}</h2>
               {group.topics.length === 0 ? (
-                <p className="text-sm text-muted-foreground italic">Tiada topik untuk tingkatan ini</p>
+                <p className="text-sm text-muted-foreground italic">Tiada topik untuk tahap ini</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {group.topics.map(topic => (
@@ -147,15 +166,15 @@ export default function TopicsPage() {
               <Input id="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Cth: Algebra" />
             </div>
             <div>
-              <Label>Tingkatan</Label>
+              <Label>Tahun / Tingkatan</Label>
               <Select value={form.form} onValueChange={(v) => v && setForm({ ...form, form: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">Tingkatan 1</SelectItem>
-                  <SelectItem value="2">Tingkatan 2</SelectItem>
-                  <SelectItem value="3">Tingkatan 3</SelectItem>
+                  {LEVELS.map(l => (
+                    <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

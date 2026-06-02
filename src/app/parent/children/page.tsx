@@ -19,6 +19,25 @@ interface Child {
   currentPoints: number;
 }
 
+const LEVELS = [
+  { value: "1", label: "Tahun 1" },
+  { value: "2", label: "Tahun 2" },
+  { value: "3", label: "Tahun 3" },
+  { value: "4", label: "Tahun 4" },
+  { value: "5", label: "Tahun 5" },
+  { value: "6", label: "Tahun 6" },
+  { value: "7", label: "Tingkatan 1" },
+  { value: "8", label: "Tingkatan 2" },
+  { value: "9", label: "Tingkatan 3" },
+  { value: "10", label: "Tingkatan 4" },
+  { value: "11", label: "Tingkatan 5" },
+];
+
+function levelLabel(form: number) {
+  const level = LEVELS.find(l => l.value === String(form));
+  return level ? level.label : `Tingkatan ${form}`;
+}
+
 const COLORS = [
   { value: "blue", label: "Biru", bg: "bg-blue-500" },
   { value: "green", label: "Hijau", bg: "bg-green-500" },
@@ -32,7 +51,7 @@ export default function ChildrenPage() {
   const [children, setChildren] = useState<Child[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Child | null>(null);
-  const [form, setForm] = useState({ name: "", pin: "", form: "1", avatarColor: "blue" });
+  const [form, setForm] = useState({ name: "", pin: "", form: "7", avatarColor: "blue" });
   const [error, setError] = useState("");
 
   useEffect(() => { fetchChildren(); }, []);
@@ -45,7 +64,7 @@ export default function ChildrenPage() {
 
   function openCreate() {
     setEditing(null);
-    setForm({ name: "", pin: "", form: "1", avatarColor: "blue" });
+    setForm({ name: "", pin: "", form: "7", avatarColor: "blue" });
     setError("");
     setDialogOpen(true);
   }
@@ -114,7 +133,7 @@ export default function ChildrenPage() {
                     <div className={`w-10 h-10 rounded-full ${COLORS.find(c => c.value === child.avatarColor)?.bg || "bg-blue-500"}`} />
                     <div>
                       <h3 className="font-semibold">{child.name}</h3>
-                      <p className="text-sm text-muted-foreground">Tingkatan {child.form} · PIN: {child.pin}</p>
+                      <p className="text-sm text-muted-foreground">{levelLabel(child.form)} · PIN: {child.pin}</p>
                     </div>
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -150,15 +169,15 @@ export default function ChildrenPage() {
               <Input id="pin" value={form.pin} onChange={e => setForm({ ...form, pin: e.target.value })} placeholder="PIN untuk log masuk" maxLength={8} />
             </div>
             <div>
-              <Label>Tingkatan</Label>
-              <Select value={form.form} onValueChange={(v) => setForm({ ...form, form: v ?? "1" })}>
+              <Label>Tahun / Tingkatan</Label>
+              <Select value={form.form} onValueChange={(v) => setForm({ ...form, form: v ?? "7" })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih tingkatan" />
+                  <SelectValue placeholder="Pilih tahap" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">Tingkatan 1</SelectItem>
-                  <SelectItem value="2">Tingkatan 2</SelectItem>
-                  <SelectItem value="3">Tingkatan 3</SelectItem>
+                  {LEVELS.map(l => (
+                    <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
