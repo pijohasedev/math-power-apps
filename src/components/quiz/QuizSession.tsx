@@ -8,7 +8,7 @@ import { CalculationQuestion } from "@/components/quiz/CalculationQuestion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, X, ChevronRight, Trophy } from "lucide-react";
+import { Check, X, ChevronRight, Trophy, Star } from "lucide-react";
 
 interface QuizQuestion {
   id: number;
@@ -32,6 +32,12 @@ interface QuizSessionProps {
   onComplete: (score: { correct: number; total: number; points: number }) => void;
 }
 
+const DIFF_STYLES: Record<string, { label: string; color: string }> = {
+  easy: { label: "Senang", color: "bg-green-100 text-green-700 border-green-200" },
+  medium: { label: "Sederhana", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  hard: { label: "Susah", color: "bg-red-100 text-red-700 border-red-200" },
+};
+
 export function QuizSession({ questions, topicName, onComplete }: QuizSessionProps) {
   const [index, setIndex] = useState(0);
   const [result, setResult] = useState<QuizResult | null>(null);
@@ -40,27 +46,21 @@ export function QuizSession({ questions, topicName, onComplete }: QuizSessionPro
 
   const current = questions[index];
   const isLast = index === questions.length - 1;
+  const diff = DIFF_STYLES[current.difficulty] || DIFF_STYLES.easy;
 
-  function diffLabel(d: string) {
-    if (d === "easy") return "Senang";
-    if (d === "medium") return "Sederhana";
-    return "Susah";
-  }
-
-  async function handleAnswer(answer: string) {
+  function handleAnswer(answer: string) {
     setSubmitting(true);
-    try {
-      const res = await fetch("/api/quiz/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionId: current.id, answer }),
-      });
-      const data = await res.json();
-      setResult(data);
-      setResults(prev => [...prev, data]);
-    } finally {
-      setSubmitting(false);
-    }
+    fetch("/api/quiz/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ questionId: current.id, answer }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        setResult(data);
+        setResults(prev => [...prev, data]);
+      })
+      .finally(() => setSubmitting(false));
   }
 
   function handleNext() {
@@ -78,25 +78,32 @@ export function QuizSession({ questions, topicName, onComplete }: QuizSessionPro
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">{topicName}</h2>
+          <h2 className="text-xl font-heading">{topicName}</h2>
           <p className="text-sm text-muted-foreground">
-            {index + 1} / {questions.length} soalan
+            Soalan {index + 1} / {questions.length}
           </p>
         </div>
-        <Badge variant="secondary">{diffLabel(current.difficulty)} · {current.points} pt</Badge>
+        <div className="flex items-center gap-2">
+          <Badge className={`${diff.color} border text-sm font-medium px-3 py-1`}>
+            {diff.label}
+          </Badge>
+          <Badge variant="secondary" className="text-sm px-3 py-1">
+            <Star className="h-3 w-3 mr-1 text-yellow-500" /> {current.points} pt
+          </Badge>
+        </div>
       </div>
 
-      <div className="w-full bg-muted rounded-full h-2">
+      <div className="relative w-full h-3 bg-gray-100 rounded-full overflow-hidden">
         <div
-          className="bg-primary h-2 rounded-full transition-all"
+          className="h-full bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full transition-all duration-500 ease-out"
           style={{ width: `${((index + (result ? 1 : 0)) / questions.length) * 100}%` }}
         />
       </div>
 
-      <Card>
+      <Card className="border-2 border-indigo-100 rounded-2xl shadow-md overflow-hidden">
         <CardContent className="pt-6">
           {current.type === "mcq" && current.options && (
             <MCQQuestion
@@ -124,42 +131,47 @@ export function QuizSession({ questions, topicName, onComplete }: QuizSessionPro
       </Card>
 
       {result && (
-        <Card className={result.correct ? "border-green-300 bg-green-50" : "border-red-300 bg-red-50"}>
+        <Card className={`border-2 rounded-2xl slide-up ${
+          result.correct ? "border-green-300 bg-gradient-to-r from-green-50 to-emerald-50" : "border-red-300 bg-gradient-to-r from-red-50 to-rose-50"
+        }`}>
           <CardContent className="pt-6">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-4 mb-4">
               {result.correct ? (
-                <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                  <Check className="h-6 w-6 text-white" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg bounce-in">
+                  <Check className="h-7 w-7 text-white" />
                 </div>
               ) : (
-                <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                  <X className="h-6 w-6 text-white" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center shadow-lg bounce-in">
+                  <X className="h-7 w-7 text-white" />
                 </div>
               )}
               <div>
-                <p className="font-semibold">
-                  {result.correct ? "Betul!" : "Salah"}
+                <p className="text-xl font-heading font-semibold">
+                  {result.correct ? "Betul! 🎉" : "Salah 😅"}
                 </p>
                 {result.correct ? (
-                  <p className="text-sm text-green-700">+{result.pointsEarned} point</p>
+                  <p className="text-green-700 font-heading text-lg">+{result.pointsEarned} point</p>
                 ) : (
-                  <p className="text-sm text-red-700">
+                  <p className="text-red-700">
                     Jawapan betul: <MathRenderer text={result.correctAnswer} />
                   </p>
                 )}
               </div>
             </div>
             {result.explanation && (
-              <div className="p-3 bg-background rounded-md border">
-                <p className="text-xs text-muted-foreground mb-1">Penjelasan:</p>
+              <div className="p-4 bg-white/80 rounded-xl border border-gray-200 mb-4">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Penjelasan:</p>
                 <p className="text-sm">{result.explanation}</p>
               </div>
             )}
-            <Button className="mt-4" onClick={handleNext}>
+            <Button
+              onClick={handleNext}
+              className="rounded-2xl h-12 px-8 text-base font-heading"
+            >
               {isLast ? (
-                <><Trophy className="h-4 w-4 mr-2" /> Lihat Keputusan</>
+                <><Trophy className="h-5 w-5 mr-2" /> Lihat Keputusan</>
               ) : (
-                <><ChevronRight className="h-4 w-4 mr-2" /> Soalan Seterusnya</>
+                <><ChevronRight className="h-5 w-5 mr-2" /> Soalan Seterusnya</>
               )}
             </Button>
           </CardContent>

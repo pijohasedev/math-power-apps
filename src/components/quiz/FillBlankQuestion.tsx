@@ -43,7 +43,7 @@ export function FillBlankQuestion({ questionText, onAnswer, disabled }: FillBlan
 
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-muted/30 rounded-lg">
+      <div className="p-5 bg-gradient-to-br from-sky-50 to-blue-50 border-2 border-sky-100 rounded-2xl">
         <MathRenderer text={questionText} displayMode />
       </div>
       <div className="flex gap-2">
@@ -56,13 +56,13 @@ export function FillBlankQuestion({ questionText, onAnswer, disabled }: FillBlan
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
           placeholder="Taip jawapan anda..."
           disabled={disabled}
-          className="flex-1 h-12 px-4 text-lg border-2 border-input rounded-lg focus:border-primary focus:ring-2 focus:ring-ring outline-none disabled:opacity-50"
+          className="flex-1 h-14 px-5 text-lg border-2 border-sky-200 rounded-2xl focus:border-sky-400 focus:ring-2 focus:ring-sky-200 outline-none disabled:opacity-50 bg-white"
         />
         <button
           type="button"
           onClick={handleSubmit}
           disabled={disabled || !input.trim()}
-          className="h-12 px-6 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          className="h-14 px-8 bg-gradient-to-r from-sky-400 to-blue-500 text-white font-heading text-base rounded-2xl hover:from-sky-500 hover:to-blue-600 disabled:opacity-50 transition-all active:scale-95 shadow-md"
         >
           Hantar
         </button>

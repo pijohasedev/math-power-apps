@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingBag, Star, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { ShoppingBag, Star, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 
 interface Reward {
   id: number;
@@ -23,6 +23,15 @@ interface Redemption {
   createdAt: string;
   reward: { id: number; name: string; icon: string; pointsRequired: number };
 }
+
+const REWARD_GRADIENTS = [
+  "from-blue-400 to-indigo-500",
+  "from-purple-400 to-pink-500",
+  "from-amber-400 to-orange-500",
+  "from-green-400 to-teal-500",
+  "from-rose-400 to-red-500",
+  "from-cyan-400 to-blue-500",
+];
 
 export default function ChildShopPage() {
   const [rewards, setRewards] = useState<Reward[]>([]);
@@ -62,47 +71,66 @@ export default function ChildShopPage() {
   }
 
   function statusBadge(status: string) {
-    if (status === "approved") return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" /> Diluluskan</Badge>;
-    if (status === "rejected") return <Badge className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 mr-1" /> Ditolak</Badge>;
-    return <Badge className="bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3 mr-1" /> Menunggu</Badge>;
+    if (status === "approved") return <Badge className="bg-green-100 text-green-800 border-green-200"><CheckCircle className="h-3 w-3 mr-1" /> Diluluskan</Badge>;
+    if (status === "rejected") return <Badge className="bg-red-100 text-red-800 border-red-200"><XCircle className="h-3 w-3 mr-1" /> Ditolak</Badge>;
+    return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200"><Clock className="h-3 w-3 mr-1" /> Menunggu</Badge>;
   }
 
+  const activeRewards = rewards.filter(r => r.isActive);
+
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <div className="text-center">
-        <div className="inline-flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl mb-4">
-          <Star className="h-8 w-8 text-yellow-500" />
+    <div className="space-y-6 max-w-3xl mx-auto">
+      <div className="flex items-center gap-3">
+        <div className="p-2.5 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 shadow-md">
+          <ShoppingBag className="h-6 w-6 text-white" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-heading">Kedai Hadiah</h1>
+          <p className="text-muted-foreground">Redeem point untuk dapat hadiah!</p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center">
+        <div className="inline-flex items-center gap-4 px-6 py-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl">
+          <Star className="h-8 w-8 text-yellow-500 sparkle" />
           <div>
             <p className="text-sm text-yellow-700">Point Anda</p>
-            <p className="text-3xl font-bold text-yellow-700">{myPoints}</p>
+            <p className="text-3xl font-heading font-bold text-yellow-700">{myPoints}</p>
           </div>
         </div>
       </div>
 
       {message && (
-        <div className={`p-3 rounded-xl text-sm font-medium ${message.type === "success" ? "bg-green-100 text-green-800 border border-green-200" : "bg-red-100 text-red-800 border border-red-200"}`}>
-          {message.text}
+        <div className={`p-4 rounded-2xl text-sm font-medium slide-up ${message.type === "success" ? "bg-green-100 text-green-800 border-2 border-green-200" : "bg-red-100 text-red-800 border-2 border-red-200"}`}>
+          <div className="flex items-center gap-2">
+            {message.type === "success" ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+            {message.text}
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {rewards.filter(r => r.isActive).map(reward => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {activeRewards.map((reward, i) => {
           const canAfford = myPoints >= reward.pointsRequired;
+          const gradient = REWARD_GRADIENTS[i % REWARD_GRADIENTS.length];
           return (
-            <Card key={reward.id} className={`relative overflow-hidden border-2 transition-all hover:shadow-md ${canAfford ? "hover:border-primary/50" : "opacity-60"}`}>
-              <CardContent className="pt-6 text-center">
-                <span className="text-4xl block mb-3">{reward.icon}</span>
-                <h3 className="font-bold text-lg">{reward.name}</h3>
+            <Card key={reward.id} className={`relative overflow-hidden border-2 transition-all duration-200 rounded-2xl ${
+              canAfford ? "hover:shadow-lg hover:-translate-y-1" : "opacity-60"
+            }`}>
+              <div className={`h-2 bg-gradient-to-r ${gradient}`} />
+              <CardContent className="pt-5 text-center">
+                <span className="text-4xl block mb-2">{reward.icon}</span>
+                <h3 className="font-heading font-bold text-lg">{reward.name}</h3>
                 <p className="text-sm text-muted-foreground mb-3">{reward.description}</p>
                 <div className="flex items-center justify-center gap-1 mb-4">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <span className="font-bold text-primary">{reward.pointsRequired}</span>
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  <span className="font-heading font-bold text-xl text-primary">{reward.pointsRequired}</span>
                   <span className="text-muted-foreground text-sm">point</span>
                 </div>
                 <Button
                   onClick={() => handleRedeem(reward.id)}
                   disabled={!canAfford || redeeming === reward.id}
-                  className="w-full rounded-xl"
+                  className="w-full rounded-2xl h-12 font-heading text-base"
                   variant={canAfford ? "default" : "outline"}
                 >
                   {redeeming === reward.id ? (
@@ -119,29 +147,32 @@ export default function ChildShopPage() {
         })}
       </div>
 
-      {rewards.filter(r => r.isActive).length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Tiada Hadiah</h3>
+      {activeRewards.length === 0 && (
+        <Card className="rounded-2xl">
+          <CardContent className="py-16 text-center">
+            <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-xl font-heading font-semibold mb-2">Tiada Hadiah</h3>
             <p className="text-muted-foreground">Minta ibu bapa tambah hadiah di panel parent!</p>
           </CardContent>
         </Card>
       )}
 
       {redemptions.length > 0 && (
-        <Card>
+        <Card className="rounded-2xl">
           <CardHeader className="cursor-pointer" onClick={() => setShowHistory(!showHistory)}>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Sejarah Redeem</CardTitle>
+              <CardTitle className="text-base font-heading flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-yellow-500" />
+                Sejarah Redeem
+              </CardTitle>
               {showHistory ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </div>
           </CardHeader>
           {showHistory && (
             <CardContent>
               <div className="space-y-2">
-                {redemptions.map(r => (
-                  <div key={r.id} className="flex items-center justify-between p-3 rounded-xl border bg-muted/30">
+                {redemptions.map((r, i) => (
+                  <div key={r.id} className="flex items-center justify-between p-3 rounded-xl border bg-muted/30 slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
                     <div className="flex items-center gap-3">
                       <span className="text-xl">{r.reward.icon}</span>
                       <div>
@@ -150,7 +181,7 @@ export default function ChildShopPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">-{r.points}pt</span>
+                      <span className="text-sm font-bold text-orange-600">-{r.points}pt</span>
                       {statusBadge(r.status)}
                     </div>
                   </div>
